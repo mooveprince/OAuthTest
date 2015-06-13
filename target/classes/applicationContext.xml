@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<b:beans xmlns:b="http://www.springframework.org/schema/beans" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		xmlns="http://www.springframework.org/schema/security" 
+		xmlns:context="http://www.springframework.org/schema/context" 
+		xmlns:oauth="http://www.springframework.org/schema/security/oauth" 
+		xsi:schemaLocation="http://www.springframework.org/schema/security 
+		http://www.springframework.org/schema/security/spring-security-3.1.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		http://www.springframework.org/schema/security/oauth
+		http://www.springframework.org/schema/security/spring-security-oauth.xsd
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+ 
+	<context:component-scan base-package="com.springjersey" />
+	
+	<global-method-security pre-post-annotations="enabled" />
+ 
+     <!--  <http auto-config='true'>
+        <intercept-url pattern="/**" access="ROLE_USER" />
+    </http> -->
+    
+    <http pattern="/rest/**" use-expressions="true" create-session="never" entry-point-ref="oAuthProcessingFilterEntryPoint">
+		<intercept-url pattern="/**" access="hasRole('ROLE_OAUTH')" requires-channel="any" />
+	</http>
+    
+    <b:bean id="oAuthProcessingFilterEntryPoint" class="com.springjersey.oauth.OAuthProcessingFilterEntryPointImpl" />
+	<b:bean id="oAuthAuthenticationHandler" class="org.springframework.security.oauth.provider.DefaultAuthenticationHandler" />
+	<b:bean id="consumerDetailsService" class="com.springjersey.oauth.OAuthConsumerDetailsService"/>
+    
+    <oauth:provider consumer-details-service-ref="consumerDetailsService" 
+					auth-handler-ref="oAuthAuthenticationHandler" 
+					token-services-ref="tokenServices" 
+					require10a="false" />
+	
+	<oauth:token-services id="tokenServices" />
+    
+    <authentication-manager alias="authenticationManager" />
+</b:beans>
